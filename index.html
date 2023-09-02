@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks | Notes </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/all.css">
+    <link rel="stylesheet" href="css/all.min.css">
+    
+    
+</head>
+<body>
+    <div class="container">
+        <div class="content" >
+            <div class="tasks">
+                <h1>Tasks <span>&</span> Notes</h1>
+                <button id="add-but"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div class="cards" id="dateTasks">
+                <div class="card" id="tasks">
+                    <div class="info">
+                        <h2>I have a meeting</h2>
+                        <button><i class="fa-regular fa-calendar-days"></i></button>
+                        <span>10/102/2023</span>
+                    </div>
+                    <div class="icons">
+                        <button><i class="fa-solid fa-pen-to-square"style="color: blue;"></i></button>
+                        <button><i class="fa-solid fa-check" style="color: green;" ></i></button>
+                        <button><i class="fa-solid fa-trash" style="color: red;"></i></button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="info">
+                        <h2>I have a meeting</h2>
+                        <span><i class="fa-regular fa-calendar-days"></i>10/10/2023</span>
+                    </div>
+                    <div class="icons">
+                        <button><i class="fa-solid fa-pen-to-square"style="color: blue;"></i></button>
+                        <button><i class="fa-solid fa-check" style="color: green;" ></i></button>
+                        <button><i class="fa-solid fa-trash" style="color: red;"></i></button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="info">
+                        <h2>I have a meeting</h2>
+                        <span><i class="fa-regular fa-calendar-days"></i>10/10/2023</span>
+                    </div>
+                    <div class="icons">
+                        <button><i class="fa-solid fa-pen-to-square"style="color: blue;"></i></button>
+                        <button><i class="fa-solid fa-check" style="color: green;" ></i></button>
+                        <button><i class="fa-solid fa-trash" style="color: red;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    let task =  {
+        "title": "Meeting",
+        "date": "25/10/2023",
+        "isDone": false
+    }
+    document.getElementById("dateTasks").innerHTML = ""
+    let dateTasks = [
+    {
+        "title": "Meeting",
+        "date": "25/01/2023",
+        "isDone": true
+    },
+    {
+        "title": "Going to Work",
+        "date": "25/05/2023",
+        "isDone": false
+    },
+    {
+        "title": "Done Received",
+        "date": "31/07/2023",
+        "isDone": true
+    }
+    ]
+    function getTasksFromSrorage(){
+        let retrievedTasks = JSON.parse(localStorage.getItem("myTasks"))
+        
+        dateTasks = retrievedTasks ?? []
+    }
+
+    getTasksFromSrorage()
+
+    function fillTasksOnThePage(){
+    document.getElementById("dateTasks").innerHTML = ""
+    let index = 0 
+    for(task of dateTasks){
+        let content =   `
+                    <div class="card ${task.isDone ? 'done' : ''}" id="tasks">
+                        <div class="info">
+                            <h2>${task.title}</h2>
+                            <button onclick="chearchDateTasks(${index})"><i class="fa-regular fa-calendar-days"></i></button>
+                            <span>${task.date}</span>
+                        </div>
+                        <div class="icons">
+                            <button onclick="editTask(${index})"><i class="fa-solid fa-pen-to-square"style="color: blue;"></i></button>
+                            ${task.isDone ? `<button onclick="checkTask(${index})"><i class="fa-regular fa-circle-xmark" style="color: red;"></i></button>
+                            ` : `
+                            <button onclick="checkTask(${index})"><i class="fa-solid fa-check" style="color: green;" ></i></button>
+                            `}
+                            
+                            <button onclick="deleteTask(${index})"><i class="fa-solid fa-trash" style="color: red;"></i></button>
+                        </div>
+                    </div>
+                    `
+        document.getElementById("dateTasks").innerHTML += content
+        index++
+    }
+    }
+    fillTasksOnThePage()
+    document.getElementById("add-but").addEventListener("click",function(){
+        let now = new Date()
+        let date = now.getDate() + "/" + (now.getMonth()+1) + "/" + now.getFullYear() 
+        let taskName = prompt("Please Write TASKS")
+        let taskObject = {
+            "title": taskName,
+            "date": date,
+            "isDone": false
+        }
+        dateTasks.push(taskObject)
+        storeTasks()
+        fillTasksOnThePage() 
+    })
+
+    function deleteTask(index){
+        let task = dateTasks[index]
+        let isConfirmed = confirm("Are You Sure You Want To Delete : " + task.title)
+
+        if (isConfirmed){
+            dateTasks.splice(index, 1) 
+            storeTasks()
+            fillTasksOnThePage()
+        }   
+    }
+    function editTask(index){
+        let task = dateTasks[index]
+        let newTaskTitle = prompt("Please Write Edited New TASKS",task.title)
+        task.title = newTaskTitle 
+        storeTasks()
+        fillTasksOnThePage()
+    }
+    function checkTask(index){
+        let task = dateTasks[index]
+        task.isDone = !task.isDone
+        storeTasks()
+        fillTasksOnThePage()
+    }
+    function chearchDateTasks(index){
+        let task = dateTasks[index]
+        let newDateTask = prompt("Please Write The Date New for TASKS",task.date)
+        task.date = newDateTask
+        storeTasks()
+        fillTasksOnThePage()
+    }
+    
+    //***** STORAGE FUNCTION *****//
+    function storeTasks(){
+        let tasksString = JSON.stringify(dateTasks)
+        localStorage.setItem("myTasks",tasksString)
+    }
+    
+
+</script>
+</html>
